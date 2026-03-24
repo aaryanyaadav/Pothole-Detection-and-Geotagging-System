@@ -1,0 +1,43 @@
+/* Leaflet Map Fixes - Robust */
+
+/* 1. Reset Box Sizing */
+/* Leaflet relies on content-box for calculations */
+.leaflet-container,
+.leaflet-container * {
+    box-sizing: content-box !important;
+}
+
+/* 2. Reset Image Styles */
+/* Global img styles like max-width: 100% break tiles */
+.leaflet-pane img,
+.leaflet-tile-pane img,
+.leaflet-marker-pane img,
+.leaflet-image-layer {
+    max-width: none !important;
+    max-height: none !important;
+    width: auto;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+/* 3. Ensure map container stacking */
+#map {
+    z-index: 1;
+    background: #ddd;
+    /* See gray if tiles missing */
+}
+
+/* 4. Fix Control Box Sizing */
+/* Controls often need border-box to look right if they were designed that way, 
+   but Leaflet core controls are usually content-box based. 
+   We'll let specific controls override if needed. */
+.leaflet-control-container .leaflet-control {
+    box-sizing: border-box !important;
+}
+
+.map-container {
+    position: relative;
+    margin-top: 80px;
+    height: calc(100vh - 80px);
+}

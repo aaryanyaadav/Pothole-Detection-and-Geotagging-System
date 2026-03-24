@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Map - Pothole Detection</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="profile-menu.js"></script>
+    <style>
+        /* Fill entire remaining space */
+        body,
+        html {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* Prevent scrolling so map is full screen */
+            margin: 0;
+        }
+
+        .map-section {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: #242424;
+        }
+
+        /* SAFE LEAFLET CSS FIX */
+        .leaflet-container img {
+            max-width: none !important;
+            max-height: none !important;
+        }
+
+        .leaflet-container,
+        .leaflet-container * {
+            box-sizing: content-box;
+        }
+
+        /* Restore border-box for our custom controls or header if needed */
+        .header,
+        .footer,
+        .header *,
+        .footer * {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header (Standard) -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo-section">
+                <div class="logo-icon">P</div>
+                <div class="logo-text">
+                    <h1>Pothole Detection</h1>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="about.html" class="nav-link">About Us</a>
+                <a href="#contact" class="nav-link">Contact Us</a>
+                <!-- Injected Menu -->
+                <div id="auth-section"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Map Container -->
+    <div class="map-section">
+        <div id="map"></div>
+    </div>
+
+    <!-- Footer Removed to maximize map area -->
+
+    <!-- Profile Template for profile-menu.js to inject -->
+    <div id="profile-menu-template" style="display:none;">
+        <div class="profile-menu">
+            <button id="profile-btn" class="profile-btn" onclick="toggleProfileDropdown(event)">
+                <div class="profile-avatar">
+                    <span id="avatar-initials">U</span>
+                </div>
+                <!-- <span id="user-name-display" class="profile-name-text">Profile</span> -->
+                <!-- Hide name on mobile/tablet to save space in map view if needed, but keeping for consistency -->
+                <span id="user-name-display" class="profile-name-text">Profile</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown">
+                <div class="dropdown-header">
+                    <span id="dropdown-user-name" class="dropdown-user-name">User</span>
+                    <span id="dropdown-user-email" class="dropdown-user-email">email@example.com</span>
+                </div>
+                <a href="dashboard.html" class="dropdown-item">Dashboard</a>
+                <a href="potholes.html" class="dropdown-item">Captured Potholes</a>
+                <div style="height:1px; background:var(--border); margin: 6px 0;"></div>
+                <a href="javascript:void(0)" onclick="logout()" class="dropdown-item danger">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="map.js"></script>
+
+    <script>
+        // Manually init auth logic since we aren't using index.html's big script
+        document.addEventListener('DOMContentLoaded', () => {
+            const authToken = localStorage.getItem('authToken');
+            const authSection = document.getElementById('auth-section');
+
+            if (authToken) {
+                const email = localStorage.getItem('userEmail');
+                const name = localStorage.getItem('userName') || (email ? email.split('@')[0] : 'User');
+
+                const template = document.getElementById('profile-menu-template');
+                authSection.innerHTML = template.innerHTML;
+
+                // Update header specific elements
+                // Note: profile-menu.js logic usually handles clicks, but we need to populate data
+                const headerName = document.querySelector('.header-content #user-name-display');
+                if (headerName) headerName.textContent = name;
+
+                const headerInitial = document.querySelector('.header-content #avatar-initials');
+                if (headerInitial) headerInitial.textContent = name.charAt(0).toUpperCase();
+
+                const ddName = document.querySelector('.header-content #dropdown-user-name');
+                if (ddName) ddName.textContent = name;
+
+                const ddEmail = document.querySelector('.header-content #dropdown-user-email');
+                if (ddEmail) ddEmail.textContent = email;
+            } else {
+                // Show Login Link if not logged in
+                authSection.innerHTML = '<a href="auth.html" class="cta-btn" style="padding:8px 16px; font-size:14px;">Sign In</a>';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

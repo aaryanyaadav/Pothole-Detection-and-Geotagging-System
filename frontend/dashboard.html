@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pothole Detection</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Dashboard specific overrides */
+        .dashboard-container {
+            max-width: 800px;
+            /* Centered, clearer focus */
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+        }
+
+        .settings-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-group input:read-only {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-save {
+            background: var(--primary-gradient);
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 50px;
+            /* Rounded per request */
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: var(--transition);
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger-round {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            width: 100%;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-danger-round:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .logout-section {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn-logout {
+            background: #27272a;
+            color: white;
+            padding: 12px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-logout:hover {
+            background: var(--danger);
+        }
+
+        /* Profile summary styling */
+        .profile-summary {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+        }
+
+        .summary-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header (Same as index.html) -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo-section">
+                <div class="logo-icon">P</div>
+                <div class="logo-text">
+                    <h1>Pothole Detection</h1>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="about.html" class="nav-link">About Us</a>
+                <a href=# class="nav-link">Contact Us</a>
+                <!-- Injected Menu -->
+                <div id="auth-section"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>User Dashboard</h1>
+            <p id="userGreeting">Manage your account settings</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- 1. Profile Info & Edit (Combined vertically) -->
+        <div class="settings-card">
+            <h2 class="section-title">Profile Information</h2>
+
+            <div class="profile-summary">
+                <div class="summary-avatar">
+                    <span id="summary-initial">U</span>
+                </div>
+                <div>
+                    <h3 id="nameDisplay" style="margin-bottom:4px;">User Name</h3>
+                    <p id="emailDisplay" style="color:var(--text-muted); font-size:14px;">email@example.com</p>
+                    <p id="joinDateDisplay" style="color:var(--text-muted); font-size:12px; margin-top:4px;">Member
+                        since...</p>
+                </div>
+            </div>
+
+            <form id="profileForm" class="form-grid">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" placeholder="Street Address">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" id="state" name="state">
+                    </div>
+                    <div class="form-group">
+                        <label for="zipcode">Zip Code</label>
+                        <input type="text" id="zipcode" name="zipcode">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself"></textarea>
+                </div>
+
+                <button type="submit" class="btn-save">Save Profile Changes</button>
+            </form>
+        </div>
+
+        <!-- 2. Security Section (Below Profile) -->
+        <div class="settings-card">
+            <h2 class="section-title">🔐 Security</h2>
+
+            <form id="passwordForm" class="form-grid">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-save" style="background:#4b5563;">Update Password</button>
+            </form>
+        </div>
+
+        <!-- 3. Account Actions (Bottom) -->
+        <div style="margin-top: 30px;">
+            <button onclick="deleteAccount()" class="btn-danger-round"
+                style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger);">Delete Account</button>
+        </div>
+
+        <div class="logout-section">
+            <button onclick="logout()" class="btn-logout">Log Out</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Pothole Detection</h4>
+                    <p style="color:var(--text-muted); font-size:14px;">
+                        AI-Powered Road Monitoring System for safer roads and faster maintenance.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Created By</h4>
+                    <p style="color:var(--text-muted);">Built with cutting-edge AI technology</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Pothole Detection. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Templates -->
+    <div id="profile-menu-template" style="display:none;">
+        <div class="profile-menu">
+            <button id="profile-btn" class="profile-btn" onclick="toggleProfileDropdown(event)">
+                <div class="profile-avatar">
+                    <span id="avatar-initials">U</span>
+                </div>
+                <span id="user-name-display" class="profile-name-text">Profile</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown">
+                <div class="dropdown-header">
+                    <span id="dropdown-user-name" class="dropdown-user-name">User</span>
+                    <span id="dropdown-user-email" class="dropdown-user-email">email@example.com</span>
+                </div>
+                <!-- Removed Edit Profile link per request -->
+                <a href="dashboard.html" class="dropdown-item">Dashboard</a>
+                <a href="potholes.html" class="dropdown-item">Captured Potholes</a>
+                <div style="height:1px; background:var(--border); margin: 6px 0;"></div>
+                <a href="javascript:void(0)" onclick="logout()" class="dropdown-item danger">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+    <script src="profile-menu.js"></script>
+    <script>
+        // Init header auth
+        document.addEventListener('DOMContentLoaded', () => {
+            const authToken = localStorage.getItem('authToken');
+            const authSection = document.getElementById('auth-section');
+            if (authToken && authSection) {
+                const email = localStorage.getItem('userEmail');
+                const name = localStorage.getItem('userName') || (email ? email.split('@')[0] : 'User');
+
+                const template = document.getElementById('profile-menu-template');
+                authSection.innerHTML = template.innerHTML;
+
+                // Update header specific elements
+                const headerName = document.querySelector('.header-content #user-name-display');
+                if (headerName) headerName.textContent = name;
+
+                const headerInitial = document.querySelector('.header-content #avatar-initials');
+                if (headerInitial) headerInitial.textContent = name.charAt(0).toUpperCase();
+
+                const ddName = document.querySelector('.header-content #dropdown-user-name');
+                if (ddName) ddName.textContent = name;
+
+                const ddEmail = document.querySelector('.header-content #dropdown-user-email');
+                if (ddEmail) ddEmail.textContent = email;
+
+                // Also update the dashboard specific summary avatar
+                const summaryInitial = document.getElementById('summary-initial');
+                if (summaryInitial) summaryInitial.textContent = name.charAt(0).toUpperCase();
+            }
+        });
+    </script>
+</body>
+
+</html>

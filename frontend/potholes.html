@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captured Potholes - Pothole Detection</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="profile-menu.js"></script>
+    <!-- Removed dashboard.js to prevent conflicts -->
+    <style>
+        .page-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            min-height: 60vh;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+        }
+
+        .potholes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .pothole-card {
+            background: var(--bg-card);
+            /* Dark card bg */
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            /* Rounded edges */
+            overflow: hidden;
+            transition: var(--transition);
+            /* Highlighted boundary effect on hover or static if preferred */
+        }
+
+        .pothole-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .img-container {
+            height: 200px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .pothole-card:hover .img-container img {
+            transform: scale(1.05);
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        /* Highlighted date/time pill */
+        .meta-pill {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .confidence-score {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .location-box {
+            background: rgba(99, 102, 241, 0.1);
+            /* Primary tint */
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #818cf8;
+            /* Lighter primary for text */
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-card {
+            padding: 10px;
+            border-radius: 50px;
+            /* Fully rounded */
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            /* Centering content */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-view {
+            background: var(--bg-body);
+            color: white;
+            border: 1px solid var(--border);
+        }
+
+        .btn-view:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo-section">
+                <div class="logo-icon">P</div>
+                <div class="logo-text">
+                    <h1>Pothole Detection</h1>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="about.html" class="nav-link">About Us</a>
+                <a href="#contact" class="nav-link">Contact Us</a>
+                <div id="auth-section"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <div class="page-header">
+            <h1>Captured Potholes</h1>
+            <p>History of road defects detected by your device</p>
+        </div>
+
+        <div id="pothole-list" class="potholes-grid">
+            <div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">
+                Loading captured data...
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Pothole Detection</h4>
+                    <p style="color:var(--text-muted); font-size:14px;">
+                        AI-Powered Road Monitoring System for safer roads and faster maintenance.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Created By</h4>
+                    <p style="color:var(--text-muted);">Built with cutting-edge AI technology</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Pothole Detection. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Profile Template -->
+    <div id="profile-menu-template" style="display:none;">
+        <div class="profile-menu">
+            <button id="profile-btn" class="profile-btn" onclick="toggleProfileDropdown(event)">
+                <div class="profile-avatar">
+                    <span id="avatar-initials">U</span>
+                </div>
+                <span id="user-name-display" class="profile-name-text">Profile</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown">
+                <div class="dropdown-header">
+                    <span id="dropdown-user-name" class="dropdown-user-name">User</span>
+                    <span id="dropdown-user-email" class="dropdown-user-email">email@example.com</span>
+                </div>
+                <a href="dashboard.html" class="dropdown-item">Dashboard</a>
+                <a href="potholes.html" class="dropdown-item">Captured Potholes</a>
+                <div style="height:1px; background:var(--border); margin: 6px 0;"></div>
+                <a href="javascript:void(0)" onclick="logout()" class="dropdown-item danger">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8001";
+
+        // Toast Notification Helper
+        function showAlert(message, type = 'info') {
+            const existing = document.querySelectorAll('.toast-notification');
+            existing.forEach(e => e.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '⚠️';
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span class="toast-message">${message}</span>
+            `;
+
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Init Auth in Header
+        document.addEventListener('DOMContentLoaded', () => {
+            const authToken = localStorage.getItem('authToken');
+            const authSection = document.getElementById('auth-section');
+
+            if (authToken) {
+                const email = localStorage.getItem('userEmail');
+                const name = localStorage.getItem('userName') || (email ? email.split('@')[0] : 'User');
+
+                const template = document.getElementById('profile-menu-template');
+                authSection.innerHTML = template.innerHTML;
+
+                // Update header specific elements
+                const headerName = document.querySelector('.header-content #user-name-display');
+                if (headerName) headerName.textContent = name;
+
+                const headerInitial = document.querySelector('.header-content #avatar-initials');
+                if (headerInitial) headerInitial.textContent = name.charAt(0).toUpperCase();
+
+                const ddName = document.querySelector('.header-content #dropdown-user-name');
+                if (ddName) ddName.textContent = name;
+
+                const ddEmail = document.querySelector('.header-content #dropdown-user-email');
+                if (ddEmail) ddEmail.textContent = email;
+
+                loadPotholes();
+            } else {
+                // Not logged in? Redirect or show simple message
+                window.location.href = 'auth.html';
+            }
+        });
+
+        async function loadPotholes() {
+            const container = document.getElementById('pothole-list');
+            try {
+                const response = await fetch(`${API_URL}/potholes`);
+                const data = await response.json();
+
+                if (!data.success || !data.potholes || data.potholes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <span style="font-size: 48px;">📭</span>
+                            <h3 style="color:white; margin:10px 0;">No potholes captured yet</h3>
+                            <p style="color:var(--text-muted);">Start the camera on the homepage to detect and report potholes.</p>
+                            <a href="index.html" class="btn-card btn-view" style="display:inline-block; margin-top:20px; width:auto; padding:10px 30px;">Go to Camera</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = '';
+                const userEmail = localStorage.getItem('userEmail');
+
+                data.potholes.forEach(p => {
+                    // Filter by user
+                    if (userEmail && p.user_email && p.user_email !== userEmail) return;
+
+                    const date = new Date(p.created_at).toLocaleDateString();
+                    const time = new Date(p.created_at).toLocaleTimeString();
+                    const conf = (p.confidence * 100).toFixed(1);
+
+                    // Image Handling
+                    let imgUrl = p.image_path;
+                    if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('data:')) {
+                        imgUrl = API_URL + imgUrl;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'pothole-card';
+                    card.id = `card-${p.id}`;
+
+                    card.innerHTML = `
+                        <div class="img-container">
+                            <img src="${imgUrl}" alt="Detected Pothole" 
+                                onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'">
+                        </div>
+                        <div class="card-content">
+                            <div class="meta-row">
+                                <span class="meta-pill">${date} • ${time}</span>
+                                <span class="status-badge">Reported</span>
+                            </div>
+                            
+                            <div class="confidence-score">
+                                ${conf}% Confidence
+                            </div>
+                            
+                            <div class="location-box">
+                                <span>📍</span>
+                                <span>${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}</span>
+                            </div>
+                            
+                            <div class="btn-group">
+                                <a href="map.html?lat=${p.latitude}&lon=${p.longitude}" class="btn-card btn-view">View on Map</a>
+                                <button onclick="deletePothole('${p.id}')" class="btn-card btn-delete">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                if (container.children.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3 style="color:white;">No captures found for your account</h3>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div style="color:var(--danger); text-align:center;">Failed to load data. Ensure backend is running.</div>';
+            }
+        }
+
+        // Global delete function
+        window.deletePothole = async function (id) {
+            if (!confirm("Are you sure you want to delete this capture? This cannot be undone.")) return;
+
+            try {
+                const response = await fetch(`${API_URL}/potholes/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    const card = document.getElementById(`card-${id}`);
+                    if (card) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => card.remove(), 300);
+                        // Show toast via dashboard.js shared logic or custom here
+                        if (window.showAlert) showAlert("Record deleted", 'success');
+                    }
+                } else {
+                    const err = await response.json();
+                    alert("Failed to delete: " + (err.error || "Unknown error"));
+                }
+            } catch (e) {
+                console.error("Delete failed", e);
+                alert("Error deleting record.");
+            }
+        }
+    </script>
+</body>
+
+</html>
