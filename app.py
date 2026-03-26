@@ -1,5 +1,3 @@
-
-
 from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,7 +27,7 @@ try:
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
-    print("⚠️  Supabase library not installed. Install with: pip install supabase")
+    print(" Supabase library not installed. Install with: pip install supabase")
 
 app = FastAPI(title="Pothole Detection API", version="1.0.0")
 
@@ -71,12 +69,12 @@ SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 if SUPABASE_AVAILABLE and SUPABASE_URL and SUPABASE_SERVICE_KEY:
     try:
         supabase_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-        print("✓ Supabase connected")
+        print(" Supabase connected")
     except Exception as e:
-        print(f"⚠️  Failed to connect to Supabase: {e}")
+        print(f"Failed to connect to Supabase: {e}")
         supabase_client = None
 else:
-    print("⚠️  Supabase not configured. Authentication will use local storage.")
+    print("Supabase not configured. Authentication will use local storage.")
 
 # In-memory user storage (for demo; use Supabase in production)
 users_db = {}  # {email: {name, password_hash, token, created_at}}
@@ -822,7 +820,7 @@ async def list_captures():
                         entry['gps'] = meta.get('gps')
                         entry['detections'] = meta.get('detections')
             except Exception as e:
-                print(f"⚠️ Failed to read metadata for {file.name}: {e}")
+                print(f"Failed to read metadata for {file.name}: {e}")
 
             captures.append(entry)
     
@@ -900,9 +898,9 @@ async def delete_pothole_record(pothole_id: str):
                 # URL format: .../storage/v1/object/public/potholes/pothole_...jpg
                 filename = image_url.split("/")[-1]
                 supabase_client.storage.from_("potholes").remove(filename)
-                print(f"✓ Deleted storage file: {filename}")
+                print(f"Deleted storage file: {filename}")
             except Exception as e:
-                print(f"⚠️ Failed to delete storage file: {e}")
+                print(f"Failed to delete storage file: {e}")
 
         return {"success": True, "message": "Pothole deleted"}
         
@@ -951,7 +949,7 @@ def save_annotated_frame(frame, detections, gps=None, user_email=None):
         # Debounce
         current_time = datetime.now().timestamp()
         if current_time - LAST_SAVE_TIME < MIN_SAVE_INTERVAL:
-            print(f"⊘ Debounced save")
+            print(f"Debounced save")
             return None
         LAST_SAVE_TIME = current_time
         
@@ -988,18 +986,18 @@ def save_annotated_frame(frame, detections, gps=None, user_email=None):
                 print(f"✓ Uploaded to Supabase Storage: {filename}")
                 
             except Exception as up_err:
-                print(f"⚠️ Storage upload failed: {up_err}")
+                print(f"Storage upload failed: {up_err}")
                 # Fallback: Save locally if cloud storage fails, just so we don't lose data
                 local_path = CAPTURES_DIR / filename
                 cv2.imwrite(str(local_path), annotated)
                 final_url = f"/captures/{filename}"
-                print(f"✓ Saved locally (fallback): {filename}")
+                print(f"Saved locally (fallback): {filename}")
         else:
             # Fallback if no Supabase client
             local_path = CAPTURES_DIR / filename
             cv2.imwrite(str(local_path), annotated)
             final_url = f"/captures/{filename}"
-            print(f"✓ Saved locally (offline): {filename}")
+            print(f"Saved locally (offline): {filename}")
 
         # 2. Save Metadata to Database/Local
         # Always output a JSON sidecar file when falling back to local captures
@@ -1022,7 +1020,7 @@ def save_annotated_frame(frame, detections, gps=None, user_email=None):
                 max_conf = max([d["confidence"] for d in detections]) if detections else 0
                 db_data = {
                     "user_email": user_email,
-                    "image_path": final_url, # Now pointing to storage URL or local fallback
+                    "image_path": final_url, 
                     "latitude": gps["lat"],
                     "longitude": gps["lon"],
                     "accuracy": gps.get("accuracy", 0),
@@ -1030,14 +1028,14 @@ def save_annotated_frame(frame, detections, gps=None, user_email=None):
                     "created_at": datetime.now().isoformat()
                 }
                 supabase_client.table("potholes").insert(db_data).execute()
-                print(f"✓ Database record created: {gps['lat']}, {gps['lon']}")
+                print(f"Database record created: {gps['lat']}, {gps['lon']}")
             except Exception as db_err:
-                print(f"⚠️ Database insert failed: {db_err}")
+                print(f"Database insert failed: {db_err}")
 
         return final_url
 
     except Exception as e:
-        print(f"✗ Error in save pipeline: {e}")
+        print(f"Error in save pipeline: {e}")
         traceback.print_exc()
         return None
 
