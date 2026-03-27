@@ -112,3 +112,5 @@ The application is structured in three main components:
 - `pothole_yolov8_best.pt`: The pre-trained computer vision model weights.
 
 
+## Author
+Aryan Kumar Yadav
