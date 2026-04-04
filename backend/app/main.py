@@ -79,7 +79,7 @@ else:
 
 #In-memory user storage
 users_db = {}  # {email: {name, password_hash, token, created_at}}
-MIN_SAVE_INTERVAL = 1.0  # seconds
+MIN_SAVE_INTERVAL = 1.0  #
 
 
 @app.get("/")
@@ -99,6 +99,20 @@ async def health_check():
         "status": "healthy",
         "model_loaded": model is not None
     }
+
+# to constantly ping the system so that it is alive
+@app.get("/ping")
+async def ping():
+    """Keep Supabase alive endpoint"""
+    if supabase_client:
+        try:
+            # Wake up Supabase by doing a tiny query
+            supabase_client.table("users").select("email").limit(1).execute()
+            return {"status": "alive", "supabase": "connected"}
+        except Exception as e:
+            return {"status": "alive", "supabase": "error", "details": str(e)}
+    
+    return {"status": "alive", "supabase": "not configured"}
 
 
 #Auth helper functions
@@ -287,7 +301,6 @@ async def login(data: dict):
 @app.post("/auth/logout")
 async def logout(data: dict):
     """Logout user (token-based)"""
-    # In a real app, invalidate the token on the server
     return {"success": True, "message": "Logged out successfully"}
 
 
@@ -607,7 +620,7 @@ async def predict(file: UploadFile = File(...)):
                         }
                     })
         
-        # Draw bounding boxes on frame for visualization
+        # Draw bounding boxes on frame
         annotated_frame = frame.copy()
         for det in detections:
             bbox = det["bbox"]
@@ -716,11 +729,10 @@ async def websocket_detect(websocket: WebSocket):
                                         }
                                     })
                         
-                        # Save frame if potholes detected (with debouncing)
+                        # Save frame if potholes detected 
                         if detections:
                             gps = message.get("gps")
                             email = message.get("email") 
-                            # Run save in background thread to avoid blocking the websocket loop
                             loop = asyncio.get_event_loop()
                             saved_path = await loop.run_in_executor(
                                 None, 
