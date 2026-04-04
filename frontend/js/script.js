@@ -6,6 +6,7 @@ let geoWatchId = null;
 let inferenceInterval = null;
 let wsConnecting = false;
 let heartbeatInterval = null;
+let isProcessingFrame = false; // ADDED THIS TO PREVENT QUEUE EXPLOSION
 const API_URL = "https://pothole-detection-and-geotagging-system.onrender.com"; // FastAPI server URL
 const WS_URL = "wss://pothole-detection-and-geotagging-system.onrender.com/ws/detect"; // WebSocket URL
 
@@ -237,6 +238,7 @@ function initializeInferenceWebSocket(videoElement) {
         };
 
         ws.onmessage = (event) => {
+            isProcessingFrame = false; // Backend finished processing
             try {
                 const response = JSON.parse(event.data);
                 if (response.success) {
@@ -250,6 +252,7 @@ function initializeInferenceWebSocket(videoElement) {
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
             wsConnecting = false;
+            isProcessingFrame = false; // Reset lock on error
         };
 
         ws.onclose = (event) => {
@@ -277,9 +280,12 @@ function startInferenceLoop(videoElement) {
 
         // If we have a connected WS and an active video, send a frame
         if (ws && ws.readyState === WebSocket.OPEN && videoElement && videoElement.srcObject) {
-            sendFrameForInference(videoElement);
+            if (!isProcessingFrame) {
+                isProcessingFrame = true; // Lock until we get a response
+                sendFrameForInference(videoElement);
+            }
         }
-    }, 200); // 200ms -> 5 FPS check rate for high responsiveness
+    }, 200); // Check every 200ms, but only send if not locked
 }
 
 function sendFrameForInference(videoElement) {

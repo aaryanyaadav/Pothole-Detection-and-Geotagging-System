@@ -56,7 +56,7 @@ except Exception as e:
     model = None
 
 #Confidence threshold
-CONFIDENCE_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.25
 
 # Debounce saves: track last save time to avoid rapid successive saves
 LAST_SAVE_TIME = 0
