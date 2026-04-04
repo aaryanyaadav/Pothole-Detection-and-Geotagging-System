@@ -187,7 +187,7 @@ Navigate to `http://localhost:8000/frontend/auth.html` and create a test account
 
 **4. Verify in Supabase:**
 
-Go to **Table Editor → users** in your Supabase Dashboard. You should see a new row with your test account's email and name — confirming the full connection is working. 🎉
+Go to **Table Editor → users** in your Supabase Dashboard. You should see a new row with your test account's email and name — confirming the full connection is working.
 
 ---
 

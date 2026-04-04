@@ -1,12 +1,8 @@
 #  Real-Time Pothole Detection & Geotagging System
 
-**An end-to-end computer vision web application that detects potholes in real-time, geotags them, and visualizes them on an interactive map.**
-
 ##  Overview
 
 This project automates pothole detection using a state-of-the-art **YOLOv8** object detection model running on **live webcam feeds** or **static image uploads**. Every detection is enriched with GPS coordinates, logged to a cloud database, and visualized on an interactive map — creating a real-world road monitoring pipeline.
-
-> **Built for:** Smart city infrastructure monitoring, municipal reporting automation, and road safety analytics.
 
 ---
 
@@ -45,7 +41,7 @@ This project automates pothole detection using a state-of-the-art **YOLOv8** obj
 │                      ▼                              │           │
 │            ┌──────────────────┐                     │           │
 │            │  YOLOv8 Model    │  ◄── OpenCV (cv2)   │           │
-│            │ (Inference Engine│       NumPy         │           │
+│            │ Inference Engine │       NumPy         │           │
 │            └────────┬─────────┘                     │           │
 │                     │ Annotated Frame + Metadata    │           │
 └─────────────────────┼───────────────────────────────┼───────────┘
