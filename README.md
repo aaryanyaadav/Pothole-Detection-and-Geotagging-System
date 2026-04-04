@@ -29,10 +29,10 @@ This project automates pothole detection using a state-of-the-art **YOLOv8** obj
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        CLIENT (Browser)                         │
-│   ┌──────────────┐   ┌──────────────┐   ┌──────────────────┐   │
-│   │  auth.html   │   │ potholes.html│   │    map.html      │   │
-│   │  (Login/Reg) │   │ (Live Feed)  │   │ (Leaflet Maps)   │   │
-│   └──────────────┘   └──────┬───────┘   └──────────────────┘   │
+│   ┌──────────────┐   ┌──────────────┐   ┌──────────────────┐    │
+│   │  auth.html   │   │ potholes.html│   │    map.html      │    │
+│   │  (Login/Reg) │   │ (Live Feed)  │   │ (Leaflet Maps)   │    │
+│   └──────────────┘   └──────┬───────┘   └──────────────────┘    │
 │                             │ WebSocket / REST                  │
 └─────────────────────────────┼───────────────────────────────────┘
                               ▼
@@ -82,7 +82,7 @@ Base64 Encode ──► WebSocket /ws/detect
                (BBox: x1,y1,x2,y2 + Confidence)
                          │
                ┌─────────┴─────────┐
-               │ Confidence > Thresh│
+               │Confidence > Thresh│
                │ + Debounce Check  │
                └─────────┬─────────┘
                          │
@@ -145,7 +145,7 @@ pothole-detection/
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### 1. Clone the Repository
 ```bash
@@ -189,7 +189,7 @@ Navigate to: **`http://localhost:8000/frontend/index.html`**
 
 ---
 
-## 🗺️ API Reference
+## API Reference
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -201,33 +201,8 @@ Navigate to: **`http://localhost:8000/frontend/index.html`**
 
 ---
 
-## 📸 Screenshots
-
-> *(Add your screenshots here)*
-
-| Live Detection | Interactive Map | Dashboard |
-|---|---|---|
-| `potholes.html` preview | `map.html` with Leaflet markers | `dashboard.html` stats |
-
----
-
-## Future Improvements
-
-- [ ] Mobile app integration (React Native / Flutter) for on-the-go detection
-- [ ] Severity classification (minor / moderate / critical pothole grading)
-- [ ] Municipal reporting API — auto-notify local authorities on new detections
-- [ ] Model retraining pipeline with user-submitted false positive corrections
-- [ ] Route optimization overlay — avoid high-pothole-density roads
-
----
 
 ##  Author
 
 **Aryan Kumar Yadav**
 
----
-## License
-
-This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for details.
-
----
