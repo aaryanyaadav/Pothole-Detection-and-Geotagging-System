@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8001";
+const API_URL = "https://pothole-detection-and-geotagging-system.onrender.com";
 let map = null;
 
 function initMap() {

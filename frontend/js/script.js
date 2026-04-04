@@ -6,8 +6,8 @@ let geoWatchId = null;
 let inferenceInterval = null;
 let wsConnecting = false;
 let heartbeatInterval = null;
-const API_URL = "http://localhost:8001"; // FastAPI server URL
-const WS_URL = "ws://localhost:8001/ws/detect"; // WebSocket URL
+const API_URL = "https://pothole-detection-and-geotagging-system.onrender.com"; // FastAPI server URL
+const WS_URL = "wss://pothole-detection-and-geotagging-system.onrender.com/ws/detect"; // WebSocket URL
 
 
 function toggleCamera() {
@@ -225,7 +225,7 @@ function initializeInferenceWebSocket(videoElement) {
         wsConnecting = true;
 
         ws.onopen = () => {
-            console.log('✓ Connected to inference server');
+            console.log('Connected to inference server');
             wsConnecting = false;
             // start heartbeat pings every 10s
             if (heartbeatInterval) clearInterval(heartbeatInterval);

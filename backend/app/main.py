@@ -203,7 +203,7 @@ async def signup(data: dict):
                 "created_at": datetime.now().isoformat()
             }
 
-            print(f"✓ New user registered: {email}")
+            print(f"New user registered: {email}")
             return {
                 "success": True,
                 "token": token,
@@ -432,7 +432,7 @@ async def update_user_profile(data: dict, request: Request):
             # In-memory update
             if email in users_db:
                 users_db[email].update(update_data)
-                print(f"✓ Profile updated for {email}")
+                print(f"Profile updated for {email}")
                 return {"success": True, "message": "Profile updated"}
         
         return JSONResponse(
@@ -517,7 +517,7 @@ async def change_password(data: dict, request: Request):
             
             user["password_hash"] = hash_password(new_password)
             user["updated_at"] = datetime.now().isoformat()
-            print(f"✓ Password changed for {email}")
+            print(f" Password changed for {email}")
         
         return {"success": True, "message": "Password changed successfully"}
     
@@ -557,7 +557,7 @@ async def delete_user_account(request: Request):
             # In-memory deletion
             if email in users_db:
                 del users_db[email]
-                print(f"✓ Account deleted for {email}")
+                print(f" Account deleted for {email}")
         
         return {"success": True, "message": "Account deleted"}
     

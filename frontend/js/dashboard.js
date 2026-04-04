@@ -1,5 +1,5 @@
 // Dashboard Configuration
-const API_URL = "http://localhost:8001";
+const API_URL = "https://pothole-detection-and-geotagging-system.onrender.com";
 
 // Get current user info from localStorage
 const userEmail = localStorage.getItem('userEmail');
@@ -76,7 +76,7 @@ async function loadUserProfile() {
         if (document.getElementById('zipcode')) document.getElementById('zipcode').value = user.zipcode || '';
         if (document.getElementById('bio')) document.getElementById('bio').value = user.bio || '';
 
-        console.log('✓ Profile loaded successfully');
+        console.log('Profile loaded successfully');
     } catch (error) {
         console.error('Error loading profile:', error);
         showAlert('Failed to load profile. Please refresh the page.', 'error');
@@ -144,7 +144,7 @@ async function updateProfile() {
         }
 
         showAlert('Profile updated successfully!', 'success');
-        console.log('✓ Profile updated');
+        console.log('Profile updated');
 
         // Update header and local storage immediately
         if (profileData.name) {
@@ -216,7 +216,7 @@ async function changePassword() {
 
         showAlert('Password changed successfully!', 'success');
         document.getElementById('passwordForm').reset();
-        console.log('✓ Password changed');
+        console.log('Password changed');
     } catch (error) {
         console.error('Error changing password:', error);
         showAlert(error.message || 'Failed to change password', 'error');
