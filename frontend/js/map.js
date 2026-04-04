@@ -167,8 +167,12 @@ modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; }
 
 // Update Map Markers
 function updateMapMarkers(potholes) {
+    const userEmail = localStorage.getItem('userEmail');
     potholes.forEach(p => {
         if (!p.latitude || !p.longitude) return;
+        
+        // Only show potholes belonging to the logged-in user
+        if (userEmail && p.user_email && p.user_email !== userEmail) return;
 
         const date = new Date(p.created_at).toLocaleString();
         const conf = (p.confidence * 100).toFixed(1);
