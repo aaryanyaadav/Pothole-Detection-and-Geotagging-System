@@ -721,15 +721,16 @@ body {
 .content-section {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 20px; /* Highly rounded as requested */
+    border-radius: 20px;
+    /* Highly rounded as requested */
     padding: 40px;
     transition: var(--transition);
 }
 
 .content-section:hover {
-    border-color: rgba(99, 102, 241, 0.4); 
+    border-color: rgba(99, 102, 241, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
 }
 
 .section-icon {
@@ -790,7 +791,7 @@ body {
 }
 
 .styled-list li::before {
-    content: "⚡";
+    content: "";
     position: absolute;
     left: 0;
     top: 2px;

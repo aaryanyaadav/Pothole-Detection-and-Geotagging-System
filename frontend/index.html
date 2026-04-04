@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pothole Detection - AI Road Monitoring</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -23,9 +23,6 @@
 
             <!-- Right: Nav & Buttons -->
             <div class="nav-links">
-                <a href="about.html" class="nav-link">About Us</a>
-                <a href="#contact" class="nav-link">Contact</a>
-
                 <!-- Profile / Login Section -->
                 <div id="auth-section">
                     <!-- Injected by script.js based on auth state -->
@@ -38,19 +35,19 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <h1 class="hero-title">
-            Real-Time Monitoring <span class="text-gradient">Dashboard</span>
+            Road Monitoring <span class="text-gradient">Dashboard</span>
         </h1>
         <p class="hero-subtitle">
-            Monitor and map road conditions in real-time
+            Pothole Detection and GeoTagging
         </p>
 
         <!-- Centered Action Buttons -->
         <div class="hero-actions">
             <button onclick="startCamera()" class="btn-hero primary">
-                <span>📹</span> Live Camera
+                <span></span> Live Camera
             </button>
             <button onclick="openMap()" class="btn-hero secondary">
-                <span>📍</span> View Map
+                <span></span> View Map
             </button>
         </div>
     </section>
@@ -62,17 +59,17 @@
         <div class="camera-card">
             <div class="card-header">
                 <div class="card-title">
-                    <span style="color: #6366f1;">📹</span>
+                    <span style="color: #6366f1;"></span>
                     <h3>Live Camera Detection</h3>
                 </div>
                 <div class="status-indicator">
-                    <span id="status-dot" style="color:var(--text-muted);">⚡</span>
+                    <span id="status-dot" style="color:var(--text-muted);"></span>
                     <span id="status-text">Offline</span>
                 </div>
             </div>
 
             <p style="color:var(--text-muted); margin-bottom:20px; font-size:14px;">
-                Real-time pothole detection using your device camera
+                Real-time pothole detection and GeoTagging using your device camera
             </p>
 
             <div class="camera-preview">
@@ -80,7 +77,7 @@
                 <!-- Main Overlay -->
                 <div id="main-detection-overlay" class="detection-overlay">Scanning...</div>
                 <div id="camera-placeholder" style="text-align:center;">
-                    <div style="font-size:40px; margin-bottom:10px; opacity:0.5;">📹</div>
+                    <div style="font-size:40px; margin-bottom:10px; opacity:0.5;"></div>
                     <p>Camera feed will appear here</p>
                 </div>
             </div>
@@ -105,139 +102,108 @@
             </div>
         </div>
 
-        <!-- Features Section -->
-        <section class="features-section">
-            <h2 class="features-title">Why Choose Pothole Detection</h2>
 
-            <div class="features-grid">
-                <!-- Card 1 -->
-                <div class="feature-card">
-                    <div class="feature-icon icon-blue">⚡</div>
-                    <h3>Real-Time Detection</h3>
-                    <p>Instant identification and classification of potholes using advanced AI.</p>
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-col">
+                        <h4>Pothole Detection</h4>
+                        <p style="color:var(--text-muted); font-size:14px;">
+                            Smart Road Monitoring System for faster geotagging of potholes.
+                        </p>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="about.html">About</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Created By</h4>
+                        <p style="color:var(--text-muted);">Aryan Kumar Yadav</p>
+                    </div>
                 </div>
-
-                <!-- Card 2 -->
-                <div class="feature-card">
-                    <div class="feature-icon icon-purple">📍</div>
-                    <h3>GPS Mapping</h3>
-                    <p>Automatic geotagging and mapping of detected potholes.</p>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="feature-card">
-                    <div class="feature-icon icon-green">📱</div>
-                    <h3>Mobile & Dash Camera</h3>
-                    <p>Works with mobile devices and dash cameras for continuous monitoring.</p>
+                <div class="footer-bottom">
+                    <p></p>
                 </div>
             </div>
-        </section>
+        </footer>
 
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h4>Pothole Detection</h4>
-                    <p style="color:var(--text-muted); font-size:14px;">
-                        AI-Powered Road Monitoring System for safer roads and faster maintenance.
-                    </p>
+        <!-- Side camera capture panel (Hidden) -->
+        <div id="side-camera-panel" class="side-camera-panel" aria-hidden="true" style="display:none;">
+            <div class="side-camera-header">
+                <div>
+                    <h4>Live Capture</h4>
+                    <p id="detection-info">Initializing...</p>
                 </div>
-                <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Created By</h4>
-                    <p style="color:var(--text-muted);">Built with cutting-edge AI technology</p>
-                </div>
+                <button id="close-side-camera" class="close-side-btn" onclick="toggleSideCamera()">Close</button>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Pothole Detection. All rights reserved.</p>
+            <video id="side-camera" autoplay playsinline muted></video>
+            <!-- Detection Message Overlay -->
+            <div id="detection-overlay" class="detection-overlay">Scanning...</div>
+        </div>
+
+        <!-- Scripts -->
+        <!-- Profile Menu Template (Hidden) -->
+        <div id="profile-menu-template" style="display:none;">
+            <div class="profile-menu">
+                <button id="profile-btn" class="profile-btn" onclick="toggleProfileDropdown(event)">
+                    <!-- Circular Avatar (Initials or Image) -->
+                    <div class="profile-avatar">
+                        <span id="avatar-initials">U</span>
+                    </div>
+                    <!-- Name Text -->
+                    <span id="user-name-display" class="profile-name-text">Profile</span>
+                </button>
+
+                <div id="profile-dropdown" class="profile-dropdown">
+                    <div class="dropdown-header">
+                        <span id="dropdown-user-name" class="dropdown-user-name">User Name</span>
+                        <span id="dropdown-user-email" class="dropdown-user-email">email@example.com</span>
+                    </div>
+
+                    <a href="dashboard.html" class="dropdown-item">Dashboard</a>
+
+                    <a href="potholes.html" class="dropdown-item">Captured Potholes</a>
+
+                    <div style="height:1px; background:var(--border); margin: 6px 0;"></div>
+
+                    <a href="javascript:void(0)" onclick="logout()" class="dropdown-item danger">Logout</a>
+                </div>
             </div>
         </div>
-    </footer>
 
-    <!-- Side camera capture panel (Hidden) -->
-    <div id="side-camera-panel" class="side-camera-panel" aria-hidden="true" style="display:none;">
-        <div class="side-camera-header">
-            <div>
-                <h4>Live Capture</h4>
-                <p id="detection-info">Initializing...</p>
-            </div>
-            <button id="close-side-camera" class="close-side-btn" onclick="toggleSideCamera()">Close</button>
-        </div>
-        <video id="side-camera" autoplay playsinline muted></video>
-        <!-- Detection Message Overlay -->
-        <div id="detection-overlay" class="detection-overlay">Scanning...</div>
-    </div>
+        <script src="js/script.js"></script>
+        <script src="js/profile-menu.js"></script>
+        <script>
+            // Inline script to handle auth state on refined index.html
+            document.addEventListener('DOMContentLoaded', () => {
+                const authToken = localStorage.getItem('authToken');
+                const authSection = document.getElementById('auth-section');
 
-    <!-- Scripts -->
-    <!-- Profile Menu Template (Hidden) -->
-    <div id="profile-menu-template" style="display:none;">
-        <div class="profile-menu">
-            <button id="profile-btn" class="profile-btn" onclick="toggleProfileDropdown(event)">
-                <!-- Circular Avatar (Initials or Image) -->
-                <div class="profile-avatar">
-                    <span id="avatar-initials">U</span>
-                </div>
-                <!-- Name Text -->
-                <span id="user-name-display" class="profile-name-text">Profile</span>
-            </button>
+                if (authToken) {
+                    // Determine user name
+                    const email = localStorage.getItem('userEmail');
+                    const name = localStorage.getItem('userName') || (email ? email.split('@')[0] : 'User');
 
-            <div id="profile-dropdown" class="profile-dropdown">
-                <div class="dropdown-header">
-                    <span id="dropdown-user-name" class="dropdown-user-name">User Name</span>
-                    <span id="dropdown-user-email" class="dropdown-user-email">email@example.com</span>
-                </div>
+                    // Inject Profile Menu
+                    const template = document.getElementById('profile-menu-template');
+                    authSection.innerHTML = template.innerHTML;
 
-                <a href="dashboard.html" class="dropdown-item">Dashboard</a>
+                    // Update dynamic values
+                    document.getElementById('user-name-display').textContent = name;
+                    document.getElementById('dropdown-user-name').textContent = name;
+                    document.getElementById('dropdown-user-email').textContent = email;
 
-                <a href="potholes.html" class="dropdown-item">Captured Potholes</a>
+                    // Set Avatar Initials
+                    const initial = name ? name.charAt(0).toUpperCase() : 'U';
+                    document.getElementById('avatar-initials').textContent = initial;
+                }
+            });
 
-                <div style="height:1px; background:var(--border); margin: 6px 0;"></div>
 
-                <a href="javascript:void(0)" onclick="logout()" class="dropdown-item danger">Logout</a>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-    <script src="profile-menu.js"></script>
-    <script>
-        // Inline script to handle auth state on refined index.html
-        document.addEventListener('DOMContentLoaded', () => {
-            const authToken = localStorage.getItem('authToken');
-            const authSection = document.getElementById('auth-section');
-
-            if (authToken) {
-                // Determine user name
-                const email = localStorage.getItem('userEmail');
-                const name = localStorage.getItem('userName') || (email ? email.split('@')[0] : 'User');
-
-                // Inject Profile Menu
-                const template = document.getElementById('profile-menu-template');
-                authSection.innerHTML = template.innerHTML;
-
-                // Update dynamic values
-                document.getElementById('user-name-display').textContent = name;
-                document.getElementById('dropdown-user-name').textContent = name;
-                document.getElementById('dropdown-user-email').textContent = email;
-
-                // Set Avatar Initials
-                const initial = name ? name.charAt(0).toUpperCase() : 'U';
-                document.getElementById('avatar-initials').textContent = initial;
-            }
-        });
-
-        // Quick function to link map button since openMap is in script.js but maybe not loaded fast enough or logic differs
-        // Keeping onclick="openMap()" implies script.js has it.
-    </script>
+        </script>
 </body>
 
 </html>
