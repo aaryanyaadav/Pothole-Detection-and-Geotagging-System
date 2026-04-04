@@ -16,11 +16,12 @@ import hashlib
 import secrets
 from typing import Optional
 
-# Load environment variables from .env file
+#Load environment variables from .env file
 from dotenv import load_dotenv
-load_dotenv()
+dotenv_path = Path(__file__).parent.parent.parent / "frontend" / ".env"
+load_dotenv(dotenv_path)
 
-# For Supabase integration (optional - can work without it initially)
+#For Supabase integration 
 import asyncio
 try:
     from supabase import create_client, Client
@@ -31,7 +32,7 @@ except ImportError:
 
 app = FastAPI(title="Pothole Detection API", version="1.0.0")
 
-# Add CORS middleware to allow requests from frontend
+#Add CORS middleware to allow requests from frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,28 +41,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create captures directory
-CAPTURES_DIR = Path(__file__).parent / "captures"
+#Create captures directory
+CAPTURES_DIR = Path(__file__).parent.parent.parent / "captures"
 CAPTURES_DIR.mkdir(exist_ok=True)
-print(f"✓ Captures directory: {CAPTURES_DIR}")
+print(f"Captures directory: {CAPTURES_DIR}")
 
-# Load the YOLOv8 model
-MODEL_PATH = Path(__file__).parent / "pothole_yolov8_best.pt"
+#Load YOLOv8 model
+MODEL_PATH = Path(__file__).parent.parent / "model" / "pothole_yolov8_best.pt"
 try:
     model = YOLO(str(MODEL_PATH))
-    print(f"✓ Model loaded successfully from {MODEL_PATH}")
+    print(f"Model loaded successfully from {MODEL_PATH}")
 except Exception as e:
-    print(f"✗ Error loading model: {e}")
+    print(f"Error loading model: {e}")
     model = None
 
-# Confidence threshold
+#Confidence threshold
 CONFIDENCE_THRESHOLD = 0.5
 
 # Debounce saves: track last save time to avoid rapid successive saves
 LAST_SAVE_TIME = 0
 MIN_SAVE_INTERVAL = 0.5
 
-# Initialize Supabase (optional)
+#Initialize Supabase
 supabase_client: Optional[Client] = None
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
@@ -76,7 +77,7 @@ if SUPABASE_AVAILABLE and SUPABASE_URL and SUPABASE_SERVICE_KEY:
 else:
     print("Supabase not configured. Authentication will use local storage.")
 
-# In-memory user storage (for demo; use Supabase in production)
+#In-memory user storage
 users_db = {}  # {email: {name, password_hash, token, created_at}}
 MIN_SAVE_INTERVAL = 1.0  # seconds
 
@@ -100,7 +101,7 @@ async def health_check():
     }
 
 
-# Auth helper functions
+#Auth helper functions
 def hash_password(password: str) -> str:
     """Hash a password using SHA256"""
     return hashlib.sha256(password.encode()).hexdigest()
@@ -111,7 +112,7 @@ def generate_token() -> str:
     return secrets.token_urlsafe(32)
 
 
-# Auth endpoints
+#Auth endpoints
 @app.post("/auth/signup")
 async def signup(data: dict):
     """
@@ -148,7 +149,7 @@ async def signup(data: dict):
                 
                 if response.data:
                     token = generate_token()
-                    # Cache token in memory so get_user_from_token works
+                    #Cache token in memory so get_user_from_token works
                     users_db[email] = {
                         "token": token,
                         "name": name
@@ -159,10 +160,6 @@ async def signup(data: dict):
                         "name": name,
                         "message": "Signup successful"
                     }
-
-# ... (skipping to login function update inside the same replace if possible, but tool only allows contiguous. I will do separate or larger block)
-
-# Let's target the login function specifically first.
 
                 else:
                     return JSONResponse(
@@ -219,14 +216,14 @@ async def login(data: dict):
         email = data.get("email", "").lower().strip()
         password = data.get("password", "")
 
-        # Validate
+        #Validate
         if not email or not password:
             return JSONResponse(
                 status_code=400,
                 content={"error": "Missing email or password"}
             )
 
-        # Check if Supabase is available
+        #Check if Supabase is available
         if supabase_client:
             # Use Supabase
             try:
@@ -256,7 +253,7 @@ async def login(data: dict):
                 print(f"Supabase login error: {e}")
                 raise
         else:
-            # Use in-memory storage
+            #Use in-memory storage
             if email not in users_db:
                 return JSONResponse(
                     status_code=401,
@@ -270,7 +267,7 @@ async def login(data: dict):
                     content={"error": "Invalid email or password"}
                 )
 
-            print(f"✓ User logged in: {email}")
+            print(f"User logged in: {email}")
             return {
                 "success": True,
                 "token": user["token"],
@@ -305,11 +302,9 @@ def get_user_from_token(authorization_header: str):
         
         # Search for user with this token
         if supabase_client:
-            # For Supabase, we'd need to validate JWT token
-            # For now, search in our in-memory db
             pass
         
-        # In-memory token lookup
+        #In-memory token lookup
         for email, user_data in users_db.items():
             if user_data.get("token") == token:
                 return email
@@ -650,12 +645,7 @@ async def predict(file: UploadFile = File(...)):
 
 @app.websocket("/ws/detect")
 async def websocket_detect(websocket: WebSocket):
-    """
-    WebSocket endpoint for real-time pothole detection
-    Accepts base64-encoded image frames
-    Returns detection results in real-time
-    DO NOT close connection after detections; keep it open indefinitely.
-    """
+
     await websocket.accept()
     
     if model is None:
@@ -727,7 +717,6 @@ async def websocket_detect(websocket: WebSocket):
                                     })
                         
                         # Save frame if potholes detected (with debouncing)
-                        # Save frame if potholes detected (with debouncing)
                         if detections:
                             gps = message.get("gps")
                             email = message.get("email") 
@@ -739,7 +728,7 @@ async def websocket_detect(websocket: WebSocket):
                                 frame, detections, gps, email
                             )
                             if saved_path:
-                                print(f"✓ Saved capture: {saved_path}")
+                                print(f"Saved capture: {saved_path}")
                         
                         # Send response — ALWAYS respond and keep connection open
                         try:
@@ -895,7 +884,6 @@ async def delete_pothole_record(pothole_id: str):
         if image_url and "supabase.co" in image_url:
             try:
                 # Extract filename from URL 
-                # URL format: .../storage/v1/object/public/potholes/pothole_...jpg
                 filename = image_url.split("/")[-1]
                 supabase_client.storage.from_("potholes").remove(filename)
                 print(f"Deleted storage file: {filename}")
@@ -961,7 +949,7 @@ def save_annotated_frame(frame, detections, gps=None, user_email=None):
             cv2.putText(annotated, f"Pothole: {det['confidence']:.1%}", (x1, y1 - 10),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         
-        # Encode image to memory buffer (no local file)
+        # Encode image to memory buffer 
         _, buffer = cv2.imencode('.jpg', annotated)
         image_bytes = buffer.tobytes()
         
@@ -983,7 +971,7 @@ def save_annotated_frame(frame, detections, gps=None, user_email=None):
                 # Get public URL
                 public_url = supabase_client.storage.from_(bucket_name).get_public_url(filename)
                 final_url = public_url
-                print(f"✓ Uploaded to Supabase Storage: {filename}")
+                print(f"Uploaded to Supabase Storage: {filename}")
                 
             except Exception as up_err:
                 print(f"Storage upload failed: {up_err}")
@@ -1000,7 +988,6 @@ def save_annotated_frame(frame, detections, gps=None, user_email=None):
             print(f"Saved locally (offline): {filename}")
 
         # 2. Save Metadata to Database/Local
-        # Always output a JSON sidecar file when falling back to local captures
         if final_url and final_url.startswith("/captures/"):
             max_conf = max([d["confidence"] for d in detections]) if detections else 0
             meta_data = {

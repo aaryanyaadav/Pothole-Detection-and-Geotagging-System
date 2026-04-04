@@ -1,116 +1,233 @@
-#  Real-Time Pothole Detection And Geotagging System
+#  Real-Time Pothole Detection & Geotagging System
 
-A comprehensive, real-time machine learning web application that detects and logs potholes. Built with Python, FastAPI, YOLOv8, and Supabase.
+**An end-to-end computer vision web application that detects potholes in real-time, geotags them, and visualizes them on an interactive map.**
 
-##  Project Overview
+##  Overview
 
-This project aims to automatically detect potholes using a compute
-r vision model running on live feeds or static images. Once detected, the system logs the pothole's GPS coordinates, user details, and an annotated image of the pothole into a database for further review and mapping.
+This project automates pothole detection using a state-of-the-art **YOLOv8** object detection model running on **live webcam feeds** or **static image uploads**. Every detection is enriched with GPS coordinates, logged to a cloud database, and visualized on an interactive map — creating a real-world road monitoring pipeline.
 
-### Key Features
-- **Real-Time Detection:** Uses WebSockets for low-latency live video feed processing.
-- **Object Detection:** Powered by the state-of-the-art YOLOv8 model (`pothole_yolov8_best.pt`).
-- **Cloud Database & Storage:** Integration with Supabase to store User Data, Pothole records, and captured images.
-- **Offline / Local Fallback:** Uses an in-memory database and local object storage if Supabase credentials are not provided.
-- **Interactive Mapping & Visualizations:** Frontend dashboard with heatmaps and statistics of detected potholes, alongside interactive Leaflet maps.
+> **Built for:** Smart city infrastructure monitoring, municipal reporting automation, and road safety analytics.
 
 ---
 
-##  System Architecture
+## Key Features
 
-The application is structured in three main components:
-
-### 1. Backend (FastAPI + YOLOv8)
-- **Web Framework:** Runs a fast, asynchronous FastAPI server (`app.py`).
-- **Machine Learning Integration:** Uses the `ultralytics` YOLOv8 model to perform inference. Frames are processed using `OpenCV (cv2)` and `numpy`.
-- **Endpoints:**
-  - `HTTP POST /predict`: Processes a single image upload and returns bounding box info.
-  - `WebSocket /ws/detect`: Receives live base64 image frames, performs inference, debounces, and streams results back to the client.
-  - REST endpoints for User Authentication, Profiles, and Capture management.
-
-### 2. Frontend (Vanilla Web Technologies)
-- **Structure:** Resides in the `frontend/` directory. Made entirely of HTML, CSS, and Vanilla JavaScript.
-- **Views:**
-  - `auth.html` & `auth.js`: User Registration & Login (Interacts with Supabase).
-  - `dashboard.html` & `dashboard.js`: Stats and settings.
-  - `map.html` & `map.js`: Powered by **Leaflet.js**, this renders an interactive web map to visualize logged potholes. It allows users to toggle between different tile layers (Google Satellite, Google Streets, OpenStreetMap), utilizes Geolocation to auto-center the view natively, and plots interactive markers with popups that show pothole detection metrics and thumbnail images.
-  - `potholes.html`: Interface for live video streaming and inference WebSocket connection.
-
-### 3. Database & Storage Layer (Supabase / Local)
-- **Supabase PostgreSQL:** Stores user credentials, profiles, and pothole metadata (Latitude, Longitude, Confidence score).
-- **Supabase Storage:** Saves annotated images locally to a bucket named `potholes`.
-- **Local Fallback Mode:** If `SUPABASE_URL` is omitted, images are dumped into the `captures/` directory and metadata is stored in local `.json` sidecar files or in-memory dicts.
+| Feature | Description |
+|---|---|
+|  **Real-Time Detection** | WebSocket-powered live video processing with minimal latency |
+|  **YOLOv8 Inference** | Custom-trained `pothole_yolov8_best.pt` model for high-accuracy detection |
+|  **GPS Geotagging** | Automatically captures and stores GPS coordinates with each detection |
+|  **Cloud Storage** | Supabase PostgreSQL + Storage for scalable, persistent logging |
+|  **Interactive Map** | Leaflet.js dashboard with heatmaps, markers, and satellite tile layers |
+|  **Offline Fallback** | Runs fully without Supabase using local in-memory DB and file storage |
+|  **Analytics Dashboard** | Detection stats, confidence trends, and historical pothole data |
 
 ---
 
-##  Workflow
+## System Architecture
 
-1. **Client App Initialization:** The user navigates to the frontend application and logs in. A JWT or custom token is assigned for session tracking.
-2. **Camera Streaming:** The user grants permission for their camera/webcam. The frontend captures frames at a set interval.
-3. **Data Transmission:** The frontend establishes a persistent WebSocket connection to the `/ws/detect` endpoint and pushes base64 encoded frames alongside GPS locations.
-4. **Machine Learning Inference:** The FastAPI backend decodes the frame and passes it to the YOLOv8 model. The model identifies the bounding box coordinates (`x1, y1, x2, y2`) and confidence scores for any potholes present.
-5. **Debouncing & Cloud Storage:** If a high-confidence pothole is found:
-   - The backend checks a timestamp debounce (e.g., `MIN_SAVE_INTERVAL`) to prevent saving identical successive frames.
-   - It draws bounding boxes on the frame using OpenCV.
-   - The annotated image is uploaded to Supabase Storage.
-   - The pothole metadata (GPS, User ID, Image URL) is logged into the Supabase database.
-6. **Frontend Update:** The detection coordinates are relayed back to the browser via the open WebSocket connection. The frontend overlays a dynamic tracking box on the user's video feed.
-
----
-
-##  Prerequisites
-
-- Python 3.8+
-- Node.js & npm (optional, mainly if extending frontend tools)
-- A Supabase Project (optional but highly recommended)
-
----
-
-##  Installation & Setup
-
-1. **Clone or Extract the Repository:**
-   ```bash
-   cd "pothole model"
-   ```
-
-2. **Install Python Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-   *(Ensure you have `fastapi`, `uvicorn`, `ultralytics`, `opencv-python`, and `supabase` installed)*.
-
-3. **Configure Environment Variables:**
-   - Create a `.env` file in the root directory:
-     ```env
-     SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
-     SUPABASE_SERVICE_KEY=YOUR_SERVICE_ROLE_KEY
-     ```
-   - *If using Supabase, follow the `SUPABASE_SETUP.md` instructions to create the necessary SQL tables (`users` and `potholes`) and storage buckets.*
-
-4. **Launch the Backend Server:**
-   ```bash
-   python app.py
-   # Or using uvicorn directly
-   uvicorn app:app --host 0.0.0.0 --port 8001
-   ```
-   *(The YOLOv8 model `pothole_yolov8_best.pt` will be loaded into memory).*
-
-5. **Serve the Frontend:**
-   - Open a new terminal instance in the root folder and run:
-   ```bash
-   python -m http.server 8000
-   ```
-   - Navigate to `http://localhost:8000/frontend/index.html` in your browser.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLIENT (Browser)                         │
+│   ┌──────────────┐   ┌──────────────┐   ┌──────────────────┐   │
+│   │  auth.html   │   │ potholes.html│   │    map.html      │   │
+│   │  (Login/Reg) │   │ (Live Feed)  │   │ (Leaflet Maps)   │   │
+│   └──────────────┘   └──────┬───────┘   └──────────────────┘   │
+│                             │ WebSocket / REST                  │
+└─────────────────────────────┼───────────────────────────────────┘
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     BACKEND (FastAPI)                           │
+│                                                                 │
+│  POST /predict        WebSocket /ws/detect     REST /users      │
+│       │                      │                      │           │
+│       └──────────────┬───────┘                      │           │
+│                      ▼                              │           │
+│            ┌──────────────────┐                     │           │
+│            │  YOLOv8 Model    │  ◄── OpenCV (cv2)   │           │
+│            │ (Inference Engine│       NumPy         │           │
+│            └────────┬─────────┘                     │           │
+│                     │ Annotated Frame + Metadata    │           │
+└─────────────────────┼───────────────────────────────┼───────────┘
+                      ▼                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  STORAGE LAYER                                  │
+│                                                                 │
+│   ┌──────────────────────┐      ┌──────────────────────────┐    │
+│   │  Supabase PostgreSQL │      │   Supabase Storage       │    │
+│   │  (users, potholes)   │      │   (annotated images)     │    │
+│   └──────────────────────┘      └──────────────────────────┘    │
+│              OR (Offline Fallback)                              │
+│   ┌──────────────────────┐      ┌──────────────────────────┐    │
+│   │   In-Memory Dict     │      │   /captures/ Directory   │    │
+│   └──────────────────────┘      └──────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-##  Project Structure Quick Reference
+## Detection Pipeline
 
-- `/app.py`: FastAPI server logic, WebSocket endpoints, Supabase connections, database querying, and YOLO inference scripts.
-- `/frontend/`: User Interfaces, UI logic, and style sheets.
-- `/captures/`: Local fallback directory for detected pothole snapshots.
-- `pothole_yolov8_best.pt`: The pre-trained computer vision model weights.
+```
+Camera Frame
+     │
+     ▼
+Base64 Encode ──► WebSocket /ws/detect
+                         │
+                         ▼
+               Decode + cv2 Processing
+                         │
+                         ▼
+               YOLOv8 Inference
+               (BBox: x1,y1,x2,y2 + Confidence)
+                         │
+               ┌─────────┴─────────┐
+               │ Confidence > Thresh│
+               │ + Debounce Check  │
+               └─────────┬─────────┘
+                         │
+                         ▼
+               Annotate Frame (OpenCV)
+                         │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+       Upload Image          Log Metadata
+       (Supabase Storage)    (GPS, UserID,
+                              Confidence Score)
+                         │
+                         ▼
+             WebSocket Response → Frontend
+             (Overlay tracking box on feed)
+```
 
+---
 
-## Author
-Aryan Kumar Yadav
+## Tech Stack
+
+**Backend**
+- `FastAPI` — Async web framework with WebSocket support
+- `Ultralytics YOLOv8` — Object detection model
+- `OpenCV (cv2)` — Frame processing and bounding box annotation
+- `NumPy` — Array processing for image data
+- `Uvicorn` — ASGI server
+
+**Frontend**
+- Vanilla `HTML / CSS / JavaScript`
+- `Leaflet.js` — Interactive maps (OpenStreetMap, Google Satellite, Google Streets)
+- Native Geolocation API for auto-centering
+
+**Database & Storage**
+- `Supabase` (PostgreSQL + Object Storage)
+- Local JSON sidecar files + `captures/` directory (offline fallback)
+
+---
+
+## Project Structure
+
+```
+pothole-detection/
+│
+├── app.py                      # FastAPI server, WebSocket endpoints, YOLO inference
+├── pothole_yolov8_best.pt      # Pre-trained YOLOv8 model weights
+├── requirements.txt
+├── .env                        # Supabase credentials (not committed)
+├── SUPABASE_SETUP.md           # SQL table setup instructions
+│
+├── frontend/
+│   ├── index.html              # Landing page
+│   ├── auth.html / auth.js     # User registration & login
+│   ├── dashboard.html / .js    # Stats and settings
+│   ├── potholes.html           # Live video stream + WebSocket detection UI
+│   └── map.html / map.js       # Interactive Leaflet map with pothole markers
+│
+└── captures/                   # Local fallback: annotated pothole snapshots
+```
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/aaryanyaadav/Pothole-Detection-and-Geotagging-System
+cd Pothole-Detection-and-Geotagging-System
+```
+
+### 2. Install Python Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+> Requires: `fastapi`, `uvicorn`, `ultralytics`, `opencv-python`, `supabase`
+
+### 3. Configure Environment Variables
+Create a `.env` file in the project root:
+```env
+SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+SUPABASE_SERVICE_KEY=YOUR_SERVICE_ROLE_KEY
+```
+> Omit these variables to run in **offline/local fallback mode**.
+
+### 4. Set Up Supabase (if using cloud)
+Follow `SUPABASE_SETUP.md` to create the required SQL tables:
+- `users` — stores user profiles and credentials
+- `potholes` — stores detection metadata (lat, lng, confidence, image URL)
+- `potholes` storage bucket — for annotated image uploads
+-  check the supabase stetup.md file for more details
+
+### 5. Start the Backend Server
+```bash
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8001 --reload
+```
+> The YOLOv8 model (`pothole_yolov8_best.pt`) loads into memory on startup.
+
+### 6. Serve the Frontend
+```bash
+python -m http.server 8000
+```
+Navigate to: **`http://localhost:8000/frontend/index.html`**
+
+---
+
+## 🗺️ API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/predict` | Upload a single image; returns bounding box + confidence |
+| `WebSocket` | `/ws/detect` | Stream base64 frames; receive real-time detection results |
+| `GET` | `/potholes` | Fetch all logged pothole records |
+| `POST` | `/register` | Register a new user |
+| `POST` | `/login` | Authenticate and receive session token |
+
+---
+
+## 📸 Screenshots
+
+> *(Add your screenshots here)*
+
+| Live Detection | Interactive Map | Dashboard |
+|---|---|---|
+| `potholes.html` preview | `map.html` with Leaflet markers | `dashboard.html` stats |
+
+---
+
+## Future Improvements
+
+- [ ] Mobile app integration (React Native / Flutter) for on-the-go detection
+- [ ] Severity classification (minor / moderate / critical pothole grading)
+- [ ] Municipal reporting API — auto-notify local authorities on new detections
+- [ ] Model retraining pipeline with user-submitted false positive corrections
+- [ ] Route optimization overlay — avoid high-pothole-density roads
+
+---
+
+##  Author
+
+**Aryan Kumar Yadav**
+
+---
+## License
+
+This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for details.
+
+---
